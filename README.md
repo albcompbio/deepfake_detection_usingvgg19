@@ -4,7 +4,7 @@ A **Flask-based AI web application** that detects whether an image is **real** o
 
 ---
 
-## 🚀 Feature
+## 🚀 Features
 
 * **AI-powered detection** using a pre-trained **VGG19 convolutional neural network**.
 * Web interface for easy image upload.
