@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deepfake Detection</title>
+    <style>
+        /* Reset basic styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* Body Styling */
+        body {
+            font-family: 'Arial', sans-serif;
+            background-image: url('https://assets.newatlas.com/dims4/default/a0f312d/2147483647/strip/true/crop/1714x1143+0+0/resize/1200x800!/quality/90/?url=http%3A%2F%2Fnewatlas-brightspot.s3.amazonaws.com%2Fc3%2Fb1%2Fb76c8c79451a8c949c58890950f2%2Fdepositphotos-651456700-l.jpg');
+            background-size: cover;
+            background-position: center;
+            color: #fff;
+            padding: 0 20px;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* Container Styling */
+        .container {
+            max-width: 900px;
+            background-color: rgba(255, 255, 255, 0.8); /* Light background with transparency */
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            backdrop-filter: blur(10px); /* Blurs the background for better contrast */
+        }
+
+        h2 {
+            font-size: 32px;
+            color: #333;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+
+        .form-container {
+            margin-bottom: 30px;
+        }
+
+        /* File input field */
+        input[type="file"] {
+            border: 2px solid #fff;
+            padding: 12px;
+            font-size: 18px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            width: 100%;
+            transition: border-color 0.3s;
+            background-color: #f1f1f1;
+        }
+
+        input[type="file"]:focus {
+            border-color: #4CAF50;
+            outline: none;
+        }
+
+        /* Submit Button */
+        button[type="submit"] {
+            background-color: #4CAF50;
+            color: #fff;
+            padding: 14px 30px;
+            font-size: 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            width: 100%;
+        }
+
+        button[type="submit"]:hover {
+            background-color: #45a049;
+        }
+
+        /* Image Preview Container */
+        #imagePreviewContainer {
+            margin-top: 30px;
+            text-align: center;
+            color: #fff;  /* Set the text color to white for better contrast */
+        }
+
+        /* Image Preview */
+        #imagePreview {
+            max-width: 100%;
+            border-radius: 8px;
+            display: none;
+            margin-bottom: 20px;
+            border: 2px solid #ddd;
+            padding: 5px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent black background */
+        }
+
+        /* Image Preview Heading */
+        #imagePreviewContainer h3 {
+            color: #fff; /* Set the color of the heading text to white for visibility */
+        }
+
+        /* Prediction Result */
+        .prediction {
+            font-size: 22px;
+            font-weight: bold;
+            color: #333;
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            background-color: #f8f9fa;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            display: none;
+        }
+
+        /* Buttons for navigation */
+        .nav-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 30px;
+            align-items: center;
+        }
+
+        .btn {
+            background-color: #007bff;
+            color: white;
+            padding: 12px 25px;
+            text-decoration: none;
+            border-radius: 8px;
+            font-size: 18px;
+            transition: background-color 0.3s;
+        }
+
+        .btn:hover {
+            background-color: #0056b3;
+        }
+
+        .exit-btn {
+            background-color: #dc3545;
+        }
+
+        .exit-btn:hover {
+            background-color: #c82333;
+        }
+
+        /* Responsive Design */
+        @media screen and (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+
+            button[type="submit"] {
+                padding: 12px 20px;
+                font-size: 18px;
+            }
+
+            .btn {
+                font-size: 16px;
+                padding: 10px 20px;
+            }
+        }
+    </style>
+    <script>
+        // JavaScript function to handle image preview
+        function previewImage(event) {
+            const reader = new FileReader(); // Create a FileReader to read the file
+            reader.onload = function () {
+                // Get the image element where the preview will be shown
+                const imgElement = document.getElementById('imagePreview');
+                imgElement.src = reader.result;  // Set the image source to the selected file
+                imgElement.style.display = 'block'; // Show the image preview
+            };
+            reader.readAsDataURL(event.target.files[0]); // Read the selected file as Data URL
+        }
+
+        // JavaScript function to handle form submission
+        function submitForm(event) {
+            event.preventDefault(); // Prevent the default form submission (page reload)
+
+            // Create a new FormData object to capture the file input
+            const formData = new FormData();
+            const fileInput = document.getElementById('image');
+            formData.append('image', fileInput.files[0]);
+
+            // Make an AJAX request to submit the form data
+            const xhr = new XMLHttpRequest();
+            xhr.open('POST', '/detect', true);
+            xhr.onload = function () {
+                if (xhr.status === 200) {
+                    // Parse the response JSON and display the prediction result
+                    const response = JSON.parse(xhr.responseText);
+                    const predictionElement = document.getElementById('prediction');
+                    predictionElement.textContent = 'Prediction: ' + response.prediction;
+                    predictionElement.style.display = 'block'; // Show the prediction
+                } else {
+                    console.error('Error: ', xhr.statusText);
+                }
+            };
+
+            // Send the form data to the server
+            xhr.send(formData);
+        }
+    </script>
+</head>
+
+<body>
+
+    <div class="container">
+        <h2>Deepfake Detection</h2>
+
+        <!-- Form to upload an image -->
+        <div class="form-container">
+            <form onsubmit="submitForm(event)" enctype="multipart/form-data">
+                <label for="image">Upload an image:</label>
+                <input type="file" name="image" id="image" required onchange="previewImage(event)">
+                <button type="submit" class="btn">Upload</button>
+            </form>
+        </div>
+
+        <!-- Image preview before submission -->
+        <div id="imagePreviewContainer">
+            <h3>Image Preview:</h3>
+            <img id="imagePreview" src="" alt="Image Preview">
+        </div>
+
+        <!-- Prediction display (after form submission) -->
+        <div id="prediction" class="prediction">
+            <!-- Prediction result will appear here after form submission -->
+        </div>
+
+        <!-- Navigation Buttons -->
+        <div class="nav-buttons">
+            <a href="/" class="btn">Go Back to Home</a>
+            <a href="/exit" class="btn exit-btn">Exit</a>
+        </div>
+
+    </div>
+
+</body>
+
+</html>
