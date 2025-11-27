@@ -7,7 +7,7 @@ A **Flask-based AI web application** that detects whether an image is **real** o
 ## 🚀 Features
 
 * **AI-powered detection** using a pre-trained **VGG19 convolutional neural network**.
-* Web interface for easy image upload.
+* Web interface for easy image uploa
 * Predicts **Real** vs **Fake** images using deep learning.
 * Supports `.jpg`, `.jpeg`, `.png` image formats.
 * Lightweight Flask app with JSON-based predictions.
